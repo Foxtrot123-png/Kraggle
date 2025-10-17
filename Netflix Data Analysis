@@ -1,0 +1,1861 @@
+{
+ "cells": [
+  {
+   "cell_type": "code",
+   "execution_count": 1,
+   "id": "e690b0fc",
+   "metadata": {
+    "_cell_guid": "b1076dfc-b9ad-4769-8c92-a6c4dae69d19",
+    "_uuid": "8f2839f25d086af736a60e9eeb907d3b93b6e0e5",
+    "execution": {
+     "iopub.execute_input": "2025-10-17T17:51:07.206077Z",
+     "iopub.status.busy": "2025-10-17T17:51:07.205692Z",
+     "iopub.status.idle": "2025-10-17T17:51:08.070232Z",
+     "shell.execute_reply": "2025-10-17T17:51:08.069047Z"
+    },
+    "papermill": {
+     "duration": 0.874537,
+     "end_time": "2025-10-17T17:51:08.072341",
+     "exception": false,
+     "start_time": "2025-10-17T17:51:07.197804",
+     "status": "completed"
+    },
+    "tags": []
+   },
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "/kaggle/input/netflix-movies-and-tv-shows/netflix_titles.csv\n"
+     ]
+    }
+   ],
+   "source": [
+    "# This Python 3 environment comes with many helpful analytics libraries installed\n",
+    "# It is defined by the kaggle/python Docker image: https://github.com/kaggle/docker-python\n",
+    "# For example, here's several helpful packages to load\n",
+    "\n",
+    "import numpy as np # linear algebra\n",
+    "import pandas as pd # data processing, CSV file I/O (e.g. pd.read_csv)\n",
+    "\n",
+    "# Input data files are available in the read-only \"../input/\" directory\n",
+    "# For example, running this (by clicking run or pressing Shift+Enter) will list all files under the input directory\n",
+    "\n",
+    "import os\n",
+    "for dirname, _, filenames in os.walk('/kaggle/input'):\n",
+    "    for filename in filenames:\n",
+    "        print(os.path.join(dirname, filename))\n",
+    "\n",
+    "# You can write up to 20GB to the current directory (/kaggle/working/) that gets preserved as output when you create a version using \"Save & Run All\" \n",
+    "# You can also write temporary files to /kaggle/temp/, but they won't be saved outside of the current session"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 2,
+   "id": "15116195",
+   "metadata": {
+    "execution": {
+     "iopub.execute_input": "2025-10-17T17:51:08.085563Z",
+     "iopub.status.busy": "2025-10-17T17:51:08.085121Z",
+     "iopub.status.idle": "2025-10-17T17:51:09.398202Z",
+     "shell.execute_reply": "2025-10-17T17:51:09.397073Z"
+    },
+    "papermill": {
+     "duration": 1.322518,
+     "end_time": "2025-10-17T17:51:09.400746",
+     "exception": false,
+     "start_time": "2025-10-17T17:51:08.078228",
+     "status": "completed"
+    },
+    "tags": []
+   },
+   "outputs": [],
+   "source": [
+    "#Importing necessary libraries\n",
+    "import matplotlib.pyplot as plt\n",
+    "import seaborn as sns \n"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 3,
+   "id": "a73c4273",
+   "metadata": {
+    "execution": {
+     "iopub.execute_input": "2025-10-17T17:51:09.413210Z",
+     "iopub.status.busy": "2025-10-17T17:51:09.412841Z",
+     "iopub.status.idle": "2025-10-17T17:51:09.547252Z",
+     "shell.execute_reply": "2025-10-17T17:51:09.546276Z"
+    },
+    "papermill": {
+     "duration": 0.143456,
+     "end_time": "2025-10-17T17:51:09.549694",
+     "exception": false,
+     "start_time": "2025-10-17T17:51:09.406238",
+     "status": "completed"
+    },
+    "tags": []
+   },
+   "outputs": [],
+   "source": [
+    "dataset = pd.read_csv('/kaggle/input/netflix-movies-and-tv-shows/netflix_titles.csv', encoding='latin-1')"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 4,
+   "id": "55a158b7",
+   "metadata": {
+    "execution": {
+     "iopub.execute_input": "2025-10-17T17:51:09.562649Z",
+     "iopub.status.busy": "2025-10-17T17:51:09.562219Z",
+     "iopub.status.idle": "2025-10-17T17:51:09.606157Z",
+     "shell.execute_reply": "2025-10-17T17:51:09.605080Z"
+    },
+    "papermill": {
+     "duration": 0.052822,
+     "end_time": "2025-10-17T17:51:09.608321",
+     "exception": false,
+     "start_time": "2025-10-17T17:51:09.555499",
+     "status": "completed"
+    },
+    "tags": []
+   },
+   "outputs": [
+    {
+     "data": {
+      "text/html": [
+       "<div>\n",
+       "<style scoped>\n",
+       "    .dataframe tbody tr th:only-of-type {\n",
+       "        vertical-align: middle;\n",
+       "    }\n",
+       "\n",
+       "    .dataframe tbody tr th {\n",
+       "        vertical-align: top;\n",
+       "    }\n",
+       "\n",
+       "    .dataframe thead th {\n",
+       "        text-align: right;\n",
+       "    }\n",
+       "</style>\n",
+       "<table border=\"1\" class=\"dataframe\">\n",
+       "  <thead>\n",
+       "    <tr style=\"text-align: right;\">\n",
+       "      <th></th>\n",
+       "      <th>show_id</th>\n",
+       "      <th>type</th>\n",
+       "      <th>title</th>\n",
+       "      <th>director</th>\n",
+       "      <th>cast</th>\n",
+       "      <th>country</th>\n",
+       "      <th>date_added</th>\n",
+       "      <th>release_year</th>\n",
+       "      <th>rating</th>\n",
+       "      <th>duration</th>\n",
+       "      <th>...</th>\n",
+       "      <th>Unnamed: 16</th>\n",
+       "      <th>Unnamed: 17</th>\n",
+       "      <th>Unnamed: 18</th>\n",
+       "      <th>Unnamed: 19</th>\n",
+       "      <th>Unnamed: 20</th>\n",
+       "      <th>Unnamed: 21</th>\n",
+       "      <th>Unnamed: 22</th>\n",
+       "      <th>Unnamed: 23</th>\n",
+       "      <th>Unnamed: 24</th>\n",
+       "      <th>Unnamed: 25</th>\n",
+       "    </tr>\n",
+       "  </thead>\n",
+       "  <tbody>\n",
+       "    <tr>\n",
+       "      <th>0</th>\n",
+       "      <td>s1</td>\n",
+       "      <td>Movie</td>\n",
+       "      <td>Dick Johnson Is Dead</td>\n",
+       "      <td>Kirsten Johnson</td>\n",
+       "      <td>NaN</td>\n",
+       "      <td>United States</td>\n",
+       "      <td>September 25, 2021</td>\n",
+       "      <td>2020</td>\n",
+       "      <td>PG-13</td>\n",
+       "      <td>90 min</td>\n",
+       "      <td>...</td>\n",
+       "      <td>NaN</td>\n",
+       "      <td>NaN</td>\n",
+       "      <td>NaN</td>\n",
+       "      <td>NaN</td>\n",
+       "      <td>NaN</td>\n",
+       "      <td>NaN</td>\n",
+       "      <td>NaN</td>\n",
+       "      <td>NaN</td>\n",
+       "      <td>NaN</td>\n",
+       "      <td>NaN</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>1</th>\n",
+       "      <td>s2</td>\n",
+       "      <td>TV Show</td>\n",
+       "      <td>Blood &amp; Water</td>\n",
+       "      <td>NaN</td>\n",
+       "      <td>Ama Qamata, Khosi Ngema, Gail Mabalane, Thaban...</td>\n",
+       "      <td>South Africa</td>\n",
+       "      <td>September 24, 2021</td>\n",
+       "      <td>2021</td>\n",
+       "      <td>TV-MA</td>\n",
+       "      <td>2 Seasons</td>\n",
+       "      <td>...</td>\n",
+       "      <td>NaN</td>\n",
+       "      <td>NaN</td>\n",
+       "      <td>NaN</td>\n",
+       "      <td>NaN</td>\n",
+       "      <td>NaN</td>\n",
+       "      <td>NaN</td>\n",
+       "      <td>NaN</td>\n",
+       "      <td>NaN</td>\n",
+       "      <td>NaN</td>\n",
+       "      <td>NaN</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>2</th>\n",
+       "      <td>s3</td>\n",
+       "      <td>TV Show</td>\n",
+       "      <td>Ganglands</td>\n",
+       "      <td>Julien Leclercq</td>\n",
+       "      <td>Sami Bouajila, Tracy Gotoas, Samuel Jouy, Nabi...</td>\n",
+       "      <td>NaN</td>\n",
+       "      <td>September 24, 2021</td>\n",
+       "      <td>2021</td>\n",
+       "      <td>TV-MA</td>\n",
+       "      <td>1 Season</td>\n",
+       "      <td>...</td>\n",
+       "      <td>NaN</td>\n",
+       "      <td>NaN</td>\n",
+       "      <td>NaN</td>\n",
+       "      <td>NaN</td>\n",
+       "      <td>NaN</td>\n",
+       "      <td>NaN</td>\n",
+       "      <td>NaN</td>\n",
+       "      <td>NaN</td>\n",
+       "      <td>NaN</td>\n",
+       "      <td>NaN</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>3</th>\n",
+       "      <td>s4</td>\n",
+       "      <td>TV Show</td>\n",
+       "      <td>Jailbirds New Orleans</td>\n",
+       "      <td>NaN</td>\n",
+       "      <td>NaN</td>\n",
+       "      <td>NaN</td>\n",
+       "      <td>September 24, 2021</td>\n",
+       "      <td>2021</td>\n",
+       "      <td>TV-MA</td>\n",
+       "      <td>1 Season</td>\n",
+       "      <td>...</td>\n",
+       "      <td>NaN</td>\n",
+       "      <td>NaN</td>\n",
+       "      <td>NaN</td>\n",
+       "      <td>NaN</td>\n",
+       "      <td>NaN</td>\n",
+       "      <td>NaN</td>\n",
+       "      <td>NaN</td>\n",
+       "      <td>NaN</td>\n",
+       "      <td>NaN</td>\n",
+       "      <td>NaN</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>4</th>\n",
+       "      <td>s5</td>\n",
+       "      <td>TV Show</td>\n",
+       "      <td>Kota Factory</td>\n",
+       "      <td>NaN</td>\n",
+       "      <td>Mayur More, Jitendra Kumar, Ranjan Raj, Alam K...</td>\n",
+       "      <td>India</td>\n",
+       "      <td>September 24, 2021</td>\n",
+       "      <td>2021</td>\n",
+       "      <td>TV-MA</td>\n",
+       "      <td>2 Seasons</td>\n",
+       "      <td>...</td>\n",
+       "      <td>NaN</td>\n",
+       "      <td>NaN</td>\n",
+       "      <td>NaN</td>\n",
+       "      <td>NaN</td>\n",
+       "      <td>NaN</td>\n",
+       "      <td>NaN</td>\n",
+       "      <td>NaN</td>\n",
+       "      <td>NaN</td>\n",
+       "      <td>NaN</td>\n",
+       "      <td>NaN</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>...</th>\n",
+       "      <td>...</td>\n",
+       "      <td>...</td>\n",
+       "      <td>...</td>\n",
+       "      <td>...</td>\n",
+       "      <td>...</td>\n",
+       "      <td>...</td>\n",
+       "      <td>...</td>\n",
+       "      <td>...</td>\n",
+       "      <td>...</td>\n",
+       "      <td>...</td>\n",
+       "      <td>...</td>\n",
+       "      <td>...</td>\n",
+       "      <td>...</td>\n",
+       "      <td>...</td>\n",
+       "      <td>...</td>\n",
+       "      <td>...</td>\n",
+       "      <td>...</td>\n",
+       "      <td>...</td>\n",
+       "      <td>...</td>\n",
+       "      <td>...</td>\n",
+       "      <td>...</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>8804</th>\n",
+       "      <td>s8805</td>\n",
+       "      <td>Movie</td>\n",
+       "      <td>Zombieland</td>\n",
+       "      <td>Ruben Fleischer</td>\n",
+       "      <td>Jesse Eisenberg, Woody Harrelson, Emma Stone, ...</td>\n",
+       "      <td>United States</td>\n",
+       "      <td>November 1, 2019</td>\n",
+       "      <td>2009</td>\n",
+       "      <td>R</td>\n",
+       "      <td>88 min</td>\n",
+       "      <td>...</td>\n",
+       "      <td>NaN</td>\n",
+       "      <td>NaN</td>\n",
+       "      <td>NaN</td>\n",
+       "      <td>NaN</td>\n",
+       "      <td>NaN</td>\n",
+       "      <td>NaN</td>\n",
+       "      <td>NaN</td>\n",
+       "      <td>NaN</td>\n",
+       "      <td>NaN</td>\n",
+       "      <td>NaN</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>8805</th>\n",
+       "      <td>s8806</td>\n",
+       "      <td>Movie</td>\n",
+       "      <td>Zoom</td>\n",
+       "      <td>Peter Hewitt</td>\n",
+       "      <td>Tim Allen, Courteney Cox, Chevy Chase, Kate Ma...</td>\n",
+       "      <td>United States</td>\n",
+       "      <td>January 11, 2020</td>\n",
+       "      <td>2006</td>\n",
+       "      <td>PG</td>\n",
+       "      <td>88 min</td>\n",
+       "      <td>...</td>\n",
+       "      <td>NaN</td>\n",
+       "      <td>NaN</td>\n",
+       "      <td>NaN</td>\n",
+       "      <td>NaN</td>\n",
+       "      <td>NaN</td>\n",
+       "      <td>NaN</td>\n",
+       "      <td>NaN</td>\n",
+       "      <td>NaN</td>\n",
+       "      <td>NaN</td>\n",
+       "      <td>NaN</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>8806</th>\n",
+       "      <td>s8807</td>\n",
+       "      <td>Movie</td>\n",
+       "      <td>Zubaan</td>\n",
+       "      <td>Mozez Singh</td>\n",
+       "      <td>Vicky Kaushal, Sarah-Jane Dias, Raaghav Chanan...</td>\n",
+       "      <td>India</td>\n",
+       "      <td>March 2, 2019</td>\n",
+       "      <td>2015</td>\n",
+       "      <td>TV-14</td>\n",
+       "      <td>111 min</td>\n",
+       "      <td>...</td>\n",
+       "      <td>NaN</td>\n",
+       "      <td>NaN</td>\n",
+       "      <td>NaN</td>\n",
+       "      <td>NaN</td>\n",
+       "      <td>NaN</td>\n",
+       "      <td>NaN</td>\n",
+       "      <td>NaN</td>\n",
+       "      <td>NaN</td>\n",
+       "      <td>NaN</td>\n",
+       "      <td>NaN</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>8807</th>\n",
+       "      <td>s8808</td>\n",
+       "      <td>TV Show</td>\n",
+       "      <td>Parasyte: The Grey</td>\n",
+       "      <td>Yeon Sang-ho</td>\n",
+       "      <td>Shin Hyun-been, Jeon Yeo-bin, Goo Kyo-hwan</td>\n",
+       "      <td>South Korea</td>\n",
+       "      <td>April 5, 2024</td>\n",
+       "      <td>2024</td>\n",
+       "      <td>TV-MA</td>\n",
+       "      <td>1 Season</td>\n",
+       "      <td>...</td>\n",
+       "      <td>NaN</td>\n",
+       "      <td>NaN</td>\n",
+       "      <td>NaN</td>\n",
+       "      <td>NaN</td>\n",
+       "      <td>NaN</td>\n",
+       "      <td>NaN</td>\n",
+       "      <td>NaN</td>\n",
+       "      <td>NaN</td>\n",
+       "      <td>NaN</td>\n",
+       "      <td>NaN</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>8808</th>\n",
+       "      <td>s8809</td>\n",
+       "      <td>Movie</td>\n",
+       "      <td>Serena</td>\n",
+       "      <td>Susanne Bier</td>\n",
+       "      <td>Bradley Cooper, Jennifer Lawrence, Toby Jones,...</td>\n",
+       "      <td>United States</td>\n",
+       "      <td>April 5, 2024</td>\n",
+       "      <td>2014</td>\n",
+       "      <td>A</td>\n",
+       "      <td>110 min</td>\n",
+       "      <td>...</td>\n",
+       "      <td>NaN</td>\n",
+       "      <td>NaN</td>\n",
+       "      <td>NaN</td>\n",
+       "      <td>NaN</td>\n",
+       "      <td>NaN</td>\n",
+       "      <td>NaN</td>\n",
+       "      <td>NaN</td>\n",
+       "      <td>NaN</td>\n",
+       "      <td>NaN</td>\n",
+       "      <td>NaN</td>\n",
+       "    </tr>\n",
+       "  </tbody>\n",
+       "</table>\n",
+       "<p>8809 rows × 26 columns</p>\n",
+       "</div>"
+      ],
+      "text/plain": [
+       "     show_id     type                  title         director  \\\n",
+       "0         s1    Movie   Dick Johnson Is Dead  Kirsten Johnson   \n",
+       "1         s2  TV Show          Blood & Water              NaN   \n",
+       "2         s3  TV Show              Ganglands  Julien Leclercq   \n",
+       "3         s4  TV Show  Jailbirds New Orleans              NaN   \n",
+       "4         s5  TV Show           Kota Factory              NaN   \n",
+       "...      ...      ...                    ...              ...   \n",
+       "8804   s8805    Movie             Zombieland  Ruben Fleischer   \n",
+       "8805   s8806    Movie                   Zoom     Peter Hewitt   \n",
+       "8806   s8807    Movie                 Zubaan      Mozez Singh   \n",
+       "8807   s8808  TV Show     Parasyte: The Grey     Yeon Sang-ho   \n",
+       "8808   s8809    Movie                 Serena     Susanne Bier   \n",
+       "\n",
+       "                                                   cast        country  \\\n",
+       "0                                                   NaN  United States   \n",
+       "1     Ama Qamata, Khosi Ngema, Gail Mabalane, Thaban...   South Africa   \n",
+       "2     Sami Bouajila, Tracy Gotoas, Samuel Jouy, Nabi...            NaN   \n",
+       "3                                                   NaN            NaN   \n",
+       "4     Mayur More, Jitendra Kumar, Ranjan Raj, Alam K...          India   \n",
+       "...                                                 ...            ...   \n",
+       "8804  Jesse Eisenberg, Woody Harrelson, Emma Stone, ...  United States   \n",
+       "8805  Tim Allen, Courteney Cox, Chevy Chase, Kate Ma...  United States   \n",
+       "8806  Vicky Kaushal, Sarah-Jane Dias, Raaghav Chanan...          India   \n",
+       "8807         Shin Hyun-been, Jeon Yeo-bin, Goo Kyo-hwan    South Korea   \n",
+       "8808  Bradley Cooper, Jennifer Lawrence, Toby Jones,...  United States   \n",
+       "\n",
+       "              date_added  release_year rating   duration  ... Unnamed: 16  \\\n",
+       "0     September 25, 2021          2020  PG-13     90 min  ...         NaN   \n",
+       "1     September 24, 2021          2021  TV-MA  2 Seasons  ...         NaN   \n",
+       "2     September 24, 2021          2021  TV-MA   1 Season  ...         NaN   \n",
+       "3     September 24, 2021          2021  TV-MA   1 Season  ...         NaN   \n",
+       "4     September 24, 2021          2021  TV-MA  2 Seasons  ...         NaN   \n",
+       "...                  ...           ...    ...        ...  ...         ...   \n",
+       "8804    November 1, 2019          2009      R     88 min  ...         NaN   \n",
+       "8805    January 11, 2020          2006     PG     88 min  ...         NaN   \n",
+       "8806       March 2, 2019          2015  TV-14    111 min  ...         NaN   \n",
+       "8807       April 5, 2024          2024  TV-MA   1 Season  ...         NaN   \n",
+       "8808       April 5, 2024          2014      A    110 min  ...         NaN   \n",
+       "\n",
+       "     Unnamed: 17  Unnamed: 18  Unnamed: 19  Unnamed: 20  Unnamed: 21  \\\n",
+       "0            NaN          NaN          NaN          NaN          NaN   \n",
+       "1            NaN          NaN          NaN          NaN          NaN   \n",
+       "2            NaN          NaN          NaN          NaN          NaN   \n",
+       "3            NaN          NaN          NaN          NaN          NaN   \n",
+       "4            NaN          NaN          NaN          NaN          NaN   \n",
+       "...          ...          ...          ...          ...          ...   \n",
+       "8804         NaN          NaN          NaN          NaN          NaN   \n",
+       "8805         NaN          NaN          NaN          NaN          NaN   \n",
+       "8806         NaN          NaN          NaN          NaN          NaN   \n",
+       "8807         NaN          NaN          NaN          NaN          NaN   \n",
+       "8808         NaN          NaN          NaN          NaN          NaN   \n",
+       "\n",
+       "      Unnamed: 22  Unnamed: 23  Unnamed: 24  Unnamed: 25  \n",
+       "0             NaN          NaN          NaN          NaN  \n",
+       "1             NaN          NaN          NaN          NaN  \n",
+       "2             NaN          NaN          NaN          NaN  \n",
+       "3             NaN          NaN          NaN          NaN  \n",
+       "4             NaN          NaN          NaN          NaN  \n",
+       "...           ...          ...          ...          ...  \n",
+       "8804          NaN          NaN          NaN          NaN  \n",
+       "8805          NaN          NaN          NaN          NaN  \n",
+       "8806          NaN          NaN          NaN          NaN  \n",
+       "8807          NaN          NaN          NaN          NaN  \n",
+       "8808          NaN          NaN          NaN          NaN  \n",
+       "\n",
+       "[8809 rows x 26 columns]"
+      ]
+     },
+     "execution_count": 4,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "dataset"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 5,
+   "id": "e711a611",
+   "metadata": {
+    "execution": {
+     "iopub.execute_input": "2025-10-17T17:51:09.621719Z",
+     "iopub.status.busy": "2025-10-17T17:51:09.621268Z",
+     "iopub.status.idle": "2025-10-17T17:51:09.635942Z",
+     "shell.execute_reply": "2025-10-17T17:51:09.634857Z"
+    },
+    "papermill": {
+     "duration": 0.023778,
+     "end_time": "2025-10-17T17:51:09.637905",
+     "exception": false,
+     "start_time": "2025-10-17T17:51:09.614127",
+     "status": "completed"
+    },
+    "tags": []
+   },
+   "outputs": [
+    {
+     "data": {
+      "text/plain": [
+       "show_id            0\n",
+       "type               0\n",
+       "title              0\n",
+       "director        2634\n",
+       "cast             825\n",
+       "country          831\n",
+       "date_added        10\n",
+       "release_year       0\n",
+       "rating             4\n",
+       "duration           3\n",
+       "listed_in          0\n",
+       "description        0\n",
+       "Unnamed: 12     8809\n",
+       "Unnamed: 13     8809\n",
+       "Unnamed: 14     8809\n",
+       "Unnamed: 15     8809\n",
+       "Unnamed: 16     8809\n",
+       "Unnamed: 17     8809\n",
+       "Unnamed: 18     8809\n",
+       "Unnamed: 19     8809\n",
+       "Unnamed: 20     8809\n",
+       "Unnamed: 21     8809\n",
+       "Unnamed: 22     8809\n",
+       "Unnamed: 23     8809\n",
+       "Unnamed: 24     8809\n",
+       "Unnamed: 25     8809\n",
+       "dtype: int64"
+      ]
+     },
+     "execution_count": 5,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "dataset.isna().sum()"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 6,
+   "id": "2196bc6c",
+   "metadata": {
+    "execution": {
+     "iopub.execute_input": "2025-10-17T17:51:09.652067Z",
+     "iopub.status.busy": "2025-10-17T17:51:09.651181Z",
+     "iopub.status.idle": "2025-10-17T17:51:09.658887Z",
+     "shell.execute_reply": "2025-10-17T17:51:09.658009Z"
+    },
+    "papermill": {
+     "duration": 0.017069,
+     "end_time": "2025-10-17T17:51:09.661021",
+     "exception": false,
+     "start_time": "2025-10-17T17:51:09.643952",
+     "status": "completed"
+    },
+    "tags": []
+   },
+   "outputs": [],
+   "source": [
+    "col = ['Unnamed: 12','Unnamed: 13','Unnamed: 14','Unnamed: 15','Unnamed: 16','Unnamed: 17','Unnamed: 18','Unnamed: 19','Unnamed: 20','Unnamed: 21','Unnamed: 22','Unnamed: 23','Unnamed: 24','Unnamed: 25']\n",
+    "dataset=dataset.drop(columns=col,axis=1)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 7,
+   "id": "ac02c9a1",
+   "metadata": {
+    "execution": {
+     "iopub.execute_input": "2025-10-17T17:51:09.675266Z",
+     "iopub.status.busy": "2025-10-17T17:51:09.674962Z",
+     "iopub.status.idle": "2025-10-17T17:51:09.688487Z",
+     "shell.execute_reply": "2025-10-17T17:51:09.687379Z"
+    },
+    "papermill": {
+     "duration": 0.023442,
+     "end_time": "2025-10-17T17:51:09.690465",
+     "exception": false,
+     "start_time": "2025-10-17T17:51:09.667023",
+     "status": "completed"
+    },
+    "tags": []
+   },
+   "outputs": [
+    {
+     "data": {
+      "text/plain": [
+       "show_id            0\n",
+       "type               0\n",
+       "title              0\n",
+       "director        2634\n",
+       "cast             825\n",
+       "country          831\n",
+       "date_added        10\n",
+       "release_year       0\n",
+       "rating             4\n",
+       "duration           3\n",
+       "listed_in          0\n",
+       "description        0\n",
+       "dtype: int64"
+      ]
+     },
+     "execution_count": 7,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "dataset.isna().sum()"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 8,
+   "id": "fd1d4230",
+   "metadata": {
+    "execution": {
+     "iopub.execute_input": "2025-10-17T17:51:09.704461Z",
+     "iopub.status.busy": "2025-10-17T17:51:09.704107Z",
+     "iopub.status.idle": "2025-10-17T17:51:09.715365Z",
+     "shell.execute_reply": "2025-10-17T17:51:09.714284Z"
+    },
+    "papermill": {
+     "duration": 0.02116,
+     "end_time": "2025-10-17T17:51:09.717867",
+     "exception": false,
+     "start_time": "2025-10-17T17:51:09.696707",
+     "status": "completed"
+    },
+    "tags": []
+   },
+   "outputs": [],
+   "source": [
+    "\n",
+    "dataset['director'] = dataset['director'].fillna('unknown directors',inplace=False)\n",
+    "dataset['cast'] = dataset['cast'].fillna('unknown cast',inplace=False)\n",
+    "dataset['country'] = dataset['country'].fillna('unknown country',inplace=False)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 9,
+   "id": "7a9d3ba2",
+   "metadata": {
+    "execution": {
+     "iopub.execute_input": "2025-10-17T17:51:09.732206Z",
+     "iopub.status.busy": "2025-10-17T17:51:09.731882Z",
+     "iopub.status.idle": "2025-10-17T17:51:09.745811Z",
+     "shell.execute_reply": "2025-10-17T17:51:09.744728Z"
+    },
+    "papermill": {
+     "duration": 0.024672,
+     "end_time": "2025-10-17T17:51:09.749137",
+     "exception": false,
+     "start_time": "2025-10-17T17:51:09.724465",
+     "status": "completed"
+    },
+    "tags": []
+   },
+   "outputs": [
+    {
+     "data": {
+      "text/plain": [
+       "show_id          0\n",
+       "type             0\n",
+       "title            0\n",
+       "director         0\n",
+       "cast             0\n",
+       "country          0\n",
+       "date_added      10\n",
+       "release_year     0\n",
+       "rating           4\n",
+       "duration         3\n",
+       "listed_in        0\n",
+       "description      0\n",
+       "dtype: int64"
+      ]
+     },
+     "execution_count": 9,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "dataset.isna().sum()"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 10,
+   "id": "e189129a",
+   "metadata": {
+    "execution": {
+     "iopub.execute_input": "2025-10-17T17:51:09.764244Z",
+     "iopub.status.busy": "2025-10-17T17:51:09.763880Z",
+     "iopub.status.idle": "2025-10-17T17:51:09.778595Z",
+     "shell.execute_reply": "2025-10-17T17:51:09.777582Z"
+    },
+    "papermill": {
+     "duration": 0.024239,
+     "end_time": "2025-10-17T17:51:09.780657",
+     "exception": false,
+     "start_time": "2025-10-17T17:51:09.756418",
+     "status": "completed"
+    },
+    "tags": []
+   },
+   "outputs": [
+    {
+     "data": {
+      "text/plain": [
+       "105708"
+      ]
+     },
+     "execution_count": 10,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "x = dataset.dropna()\n",
+    "dataset.size"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 11,
+   "id": "a707ffa7",
+   "metadata": {
+    "execution": {
+     "iopub.execute_input": "2025-10-17T17:51:09.794876Z",
+     "iopub.status.busy": "2025-10-17T17:51:09.794480Z",
+     "iopub.status.idle": "2025-10-17T17:51:09.800939Z",
+     "shell.execute_reply": "2025-10-17T17:51:09.799952Z"
+    },
+    "papermill": {
+     "duration": 0.016063,
+     "end_time": "2025-10-17T17:51:09.803019",
+     "exception": false,
+     "start_time": "2025-10-17T17:51:09.786956",
+     "status": "completed"
+    },
+    "tags": []
+   },
+   "outputs": [
+    {
+     "data": {
+      "text/plain": [
+       "105504"
+      ]
+     },
+     "execution_count": 11,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "x.size"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 12,
+   "id": "7903070b",
+   "metadata": {
+    "execution": {
+     "iopub.execute_input": "2025-10-17T17:51:09.817648Z",
+     "iopub.status.busy": "2025-10-17T17:51:09.817245Z",
+     "iopub.status.idle": "2025-10-17T17:51:09.831746Z",
+     "shell.execute_reply": "2025-10-17T17:51:09.830765Z"
+    },
+    "papermill": {
+     "duration": 0.024316,
+     "end_time": "2025-10-17T17:51:09.833703",
+     "exception": false,
+     "start_time": "2025-10-17T17:51:09.809387",
+     "status": "completed"
+    },
+    "tags": []
+   },
+   "outputs": [
+    {
+     "data": {
+      "text/plain": [
+       "show_id         0\n",
+       "type            0\n",
+       "title           0\n",
+       "director        0\n",
+       "cast            0\n",
+       "country         0\n",
+       "date_added      0\n",
+       "release_year    0\n",
+       "rating          0\n",
+       "duration        0\n",
+       "listed_in       0\n",
+       "description     0\n",
+       "dtype: int64"
+      ]
+     },
+     "execution_count": 12,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "x.isna().sum()"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 13,
+   "id": "4e6e26ed",
+   "metadata": {
+    "execution": {
+     "iopub.execute_input": "2025-10-17T17:51:09.848399Z",
+     "iopub.status.busy": "2025-10-17T17:51:09.848033Z",
+     "iopub.status.idle": "2025-10-17T17:51:09.864365Z",
+     "shell.execute_reply": "2025-10-17T17:51:09.863244Z"
+    },
+    "papermill": {
+     "duration": 0.026167,
+     "end_time": "2025-10-17T17:51:09.866303",
+     "exception": false,
+     "start_time": "2025-10-17T17:51:09.840136",
+     "status": "completed"
+    },
+    "tags": []
+   },
+   "outputs": [
+    {
+     "data": {
+      "text/html": [
+       "<div>\n",
+       "<style scoped>\n",
+       "    .dataframe tbody tr th:only-of-type {\n",
+       "        vertical-align: middle;\n",
+       "    }\n",
+       "\n",
+       "    .dataframe tbody tr th {\n",
+       "        vertical-align: top;\n",
+       "    }\n",
+       "\n",
+       "    .dataframe thead th {\n",
+       "        text-align: right;\n",
+       "    }\n",
+       "</style>\n",
+       "<table border=\"1\" class=\"dataframe\">\n",
+       "  <thead>\n",
+       "    <tr style=\"text-align: right;\">\n",
+       "      <th></th>\n",
+       "      <th>show_id</th>\n",
+       "      <th>type</th>\n",
+       "      <th>title</th>\n",
+       "      <th>director</th>\n",
+       "      <th>cast</th>\n",
+       "      <th>country</th>\n",
+       "      <th>date_added</th>\n",
+       "      <th>release_year</th>\n",
+       "      <th>rating</th>\n",
+       "      <th>duration</th>\n",
+       "      <th>listed_in</th>\n",
+       "      <th>description</th>\n",
+       "    </tr>\n",
+       "  </thead>\n",
+       "  <tbody>\n",
+       "    <tr>\n",
+       "      <th>0</th>\n",
+       "      <td>s1</td>\n",
+       "      <td>Movie</td>\n",
+       "      <td>Dick Johnson Is Dead</td>\n",
+       "      <td>Kirsten Johnson</td>\n",
+       "      <td>unknown cast</td>\n",
+       "      <td>United States</td>\n",
+       "      <td>September 25, 2021</td>\n",
+       "      <td>2020</td>\n",
+       "      <td>PG-13</td>\n",
+       "      <td>90 min</td>\n",
+       "      <td>Documentaries</td>\n",
+       "      <td>As her father nears the end of his life, filmm...</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>1</th>\n",
+       "      <td>s2</td>\n",
+       "      <td>TV Show</td>\n",
+       "      <td>Blood &amp; Water</td>\n",
+       "      <td>unknown directors</td>\n",
+       "      <td>Ama Qamata, Khosi Ngema, Gail Mabalane, Thaban...</td>\n",
+       "      <td>South Africa</td>\n",
+       "      <td>September 24, 2021</td>\n",
+       "      <td>2021</td>\n",
+       "      <td>TV-MA</td>\n",
+       "      <td>2 Seasons</td>\n",
+       "      <td>International TV Shows, TV Dramas, TV Mysteries</td>\n",
+       "      <td>After crossing paths at a party, a Cape Town t...</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>2</th>\n",
+       "      <td>s3</td>\n",
+       "      <td>TV Show</td>\n",
+       "      <td>Ganglands</td>\n",
+       "      <td>Julien Leclercq</td>\n",
+       "      <td>Sami Bouajila, Tracy Gotoas, Samuel Jouy, Nabi...</td>\n",
+       "      <td>unknown country</td>\n",
+       "      <td>September 24, 2021</td>\n",
+       "      <td>2021</td>\n",
+       "      <td>TV-MA</td>\n",
+       "      <td>1 Season</td>\n",
+       "      <td>Crime TV Shows, International TV Shows, TV Act...</td>\n",
+       "      <td>To protect his family from a powerful drug lor...</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>3</th>\n",
+       "      <td>s4</td>\n",
+       "      <td>TV Show</td>\n",
+       "      <td>Jailbirds New Orleans</td>\n",
+       "      <td>unknown directors</td>\n",
+       "      <td>unknown cast</td>\n",
+       "      <td>unknown country</td>\n",
+       "      <td>September 24, 2021</td>\n",
+       "      <td>2021</td>\n",
+       "      <td>TV-MA</td>\n",
+       "      <td>1 Season</td>\n",
+       "      <td>Docuseries, Reality TV</td>\n",
+       "      <td>Feuds, flirtations and toilet talk go down amo...</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>4</th>\n",
+       "      <td>s5</td>\n",
+       "      <td>TV Show</td>\n",
+       "      <td>Kota Factory</td>\n",
+       "      <td>unknown directors</td>\n",
+       "      <td>Mayur More, Jitendra Kumar, Ranjan Raj, Alam K...</td>\n",
+       "      <td>India</td>\n",
+       "      <td>September 24, 2021</td>\n",
+       "      <td>2021</td>\n",
+       "      <td>TV-MA</td>\n",
+       "      <td>2 Seasons</td>\n",
+       "      <td>International TV Shows, Romantic TV Shows, TV ...</td>\n",
+       "      <td>In a city of coaching centers known to train I...</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>...</th>\n",
+       "      <td>...</td>\n",
+       "      <td>...</td>\n",
+       "      <td>...</td>\n",
+       "      <td>...</td>\n",
+       "      <td>...</td>\n",
+       "      <td>...</td>\n",
+       "      <td>...</td>\n",
+       "      <td>...</td>\n",
+       "      <td>...</td>\n",
+       "      <td>...</td>\n",
+       "      <td>...</td>\n",
+       "      <td>...</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>8804</th>\n",
+       "      <td>s8805</td>\n",
+       "      <td>Movie</td>\n",
+       "      <td>Zombieland</td>\n",
+       "      <td>Ruben Fleischer</td>\n",
+       "      <td>Jesse Eisenberg, Woody Harrelson, Emma Stone, ...</td>\n",
+       "      <td>United States</td>\n",
+       "      <td>November 1, 2019</td>\n",
+       "      <td>2009</td>\n",
+       "      <td>R</td>\n",
+       "      <td>88 min</td>\n",
+       "      <td>Comedies, Horror Movies</td>\n",
+       "      <td>Looking to survive in a world taken over by zo...</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>8805</th>\n",
+       "      <td>s8806</td>\n",
+       "      <td>Movie</td>\n",
+       "      <td>Zoom</td>\n",
+       "      <td>Peter Hewitt</td>\n",
+       "      <td>Tim Allen, Courteney Cox, Chevy Chase, Kate Ma...</td>\n",
+       "      <td>United States</td>\n",
+       "      <td>January 11, 2020</td>\n",
+       "      <td>2006</td>\n",
+       "      <td>PG</td>\n",
+       "      <td>88 min</td>\n",
+       "      <td>Children &amp; Family Movies, Comedies</td>\n",
+       "      <td>Dragged from civilian life, a former superhero...</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>8806</th>\n",
+       "      <td>s8807</td>\n",
+       "      <td>Movie</td>\n",
+       "      <td>Zubaan</td>\n",
+       "      <td>Mozez Singh</td>\n",
+       "      <td>Vicky Kaushal, Sarah-Jane Dias, Raaghav Chanan...</td>\n",
+       "      <td>India</td>\n",
+       "      <td>March 2, 2019</td>\n",
+       "      <td>2015</td>\n",
+       "      <td>TV-14</td>\n",
+       "      <td>111 min</td>\n",
+       "      <td>Dramas, International Movies, Music &amp; Musicals</td>\n",
+       "      <td>A scrappy but poor boy worms his way into a ty...</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>8807</th>\n",
+       "      <td>s8808</td>\n",
+       "      <td>TV Show</td>\n",
+       "      <td>Parasyte: The Grey</td>\n",
+       "      <td>Yeon Sang-ho</td>\n",
+       "      <td>Shin Hyun-been, Jeon Yeo-bin, Goo Kyo-hwan</td>\n",
+       "      <td>South Korea</td>\n",
+       "      <td>April 5, 2024</td>\n",
+       "      <td>2024</td>\n",
+       "      <td>TV-MA</td>\n",
+       "      <td>1 Season</td>\n",
+       "      <td>Sci-fi, Horror, Action</td>\n",
+       "      <td>A new breed of parasitic aliens arrive on Eart...</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>8808</th>\n",
+       "      <td>s8809</td>\n",
+       "      <td>Movie</td>\n",
+       "      <td>Serena</td>\n",
+       "      <td>Susanne Bier</td>\n",
+       "      <td>Bradley Cooper, Jennifer Lawrence, Toby Jones,...</td>\n",
+       "      <td>United States</td>\n",
+       "      <td>April 5, 2024</td>\n",
+       "      <td>2014</td>\n",
+       "      <td>A</td>\n",
+       "      <td>110 min</td>\n",
+       "      <td>Drama, Romance, Thriller</td>\n",
+       "      <td>In the 1920s, a newly married couple attempt t...</td>\n",
+       "    </tr>\n",
+       "  </tbody>\n",
+       "</table>\n",
+       "<p>8792 rows × 12 columns</p>\n",
+       "</div>"
+      ],
+      "text/plain": [
+       "     show_id     type                  title           director  \\\n",
+       "0         s1    Movie   Dick Johnson Is Dead    Kirsten Johnson   \n",
+       "1         s2  TV Show          Blood & Water  unknown directors   \n",
+       "2         s3  TV Show              Ganglands    Julien Leclercq   \n",
+       "3         s4  TV Show  Jailbirds New Orleans  unknown directors   \n",
+       "4         s5  TV Show           Kota Factory  unknown directors   \n",
+       "...      ...      ...                    ...                ...   \n",
+       "8804   s8805    Movie             Zombieland    Ruben Fleischer   \n",
+       "8805   s8806    Movie                   Zoom       Peter Hewitt   \n",
+       "8806   s8807    Movie                 Zubaan        Mozez Singh   \n",
+       "8807   s8808  TV Show     Parasyte: The Grey       Yeon Sang-ho   \n",
+       "8808   s8809    Movie                 Serena       Susanne Bier   \n",
+       "\n",
+       "                                                   cast          country  \\\n",
+       "0                                          unknown cast    United States   \n",
+       "1     Ama Qamata, Khosi Ngema, Gail Mabalane, Thaban...     South Africa   \n",
+       "2     Sami Bouajila, Tracy Gotoas, Samuel Jouy, Nabi...  unknown country   \n",
+       "3                                          unknown cast  unknown country   \n",
+       "4     Mayur More, Jitendra Kumar, Ranjan Raj, Alam K...            India   \n",
+       "...                                                 ...              ...   \n",
+       "8804  Jesse Eisenberg, Woody Harrelson, Emma Stone, ...    United States   \n",
+       "8805  Tim Allen, Courteney Cox, Chevy Chase, Kate Ma...    United States   \n",
+       "8806  Vicky Kaushal, Sarah-Jane Dias, Raaghav Chanan...            India   \n",
+       "8807         Shin Hyun-been, Jeon Yeo-bin, Goo Kyo-hwan      South Korea   \n",
+       "8808  Bradley Cooper, Jennifer Lawrence, Toby Jones,...    United States   \n",
+       "\n",
+       "              date_added  release_year rating   duration  \\\n",
+       "0     September 25, 2021          2020  PG-13     90 min   \n",
+       "1     September 24, 2021          2021  TV-MA  2 Seasons   \n",
+       "2     September 24, 2021          2021  TV-MA   1 Season   \n",
+       "3     September 24, 2021          2021  TV-MA   1 Season   \n",
+       "4     September 24, 2021          2021  TV-MA  2 Seasons   \n",
+       "...                  ...           ...    ...        ...   \n",
+       "8804    November 1, 2019          2009      R     88 min   \n",
+       "8805    January 11, 2020          2006     PG     88 min   \n",
+       "8806       March 2, 2019          2015  TV-14    111 min   \n",
+       "8807       April 5, 2024          2024  TV-MA   1 Season   \n",
+       "8808       April 5, 2024          2014      A    110 min   \n",
+       "\n",
+       "                                              listed_in  \\\n",
+       "0                                         Documentaries   \n",
+       "1       International TV Shows, TV Dramas, TV Mysteries   \n",
+       "2     Crime TV Shows, International TV Shows, TV Act...   \n",
+       "3                                Docuseries, Reality TV   \n",
+       "4     International TV Shows, Romantic TV Shows, TV ...   \n",
+       "...                                                 ...   \n",
+       "8804                            Comedies, Horror Movies   \n",
+       "8805                 Children & Family Movies, Comedies   \n",
+       "8806     Dramas, International Movies, Music & Musicals   \n",
+       "8807                             Sci-fi, Horror, Action   \n",
+       "8808                           Drama, Romance, Thriller   \n",
+       "\n",
+       "                                            description  \n",
+       "0     As her father nears the end of his life, filmm...  \n",
+       "1     After crossing paths at a party, a Cape Town t...  \n",
+       "2     To protect his family from a powerful drug lor...  \n",
+       "3     Feuds, flirtations and toilet talk go down amo...  \n",
+       "4     In a city of coaching centers known to train I...  \n",
+       "...                                                 ...  \n",
+       "8804  Looking to survive in a world taken over by zo...  \n",
+       "8805  Dragged from civilian life, a former superhero...  \n",
+       "8806  A scrappy but poor boy worms his way into a ty...  \n",
+       "8807  A new breed of parasitic aliens arrive on Eart...  \n",
+       "8808  In the 1920s, a newly married couple attempt t...  \n",
+       "\n",
+       "[8792 rows x 12 columns]"
+      ]
+     },
+     "execution_count": 13,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "x"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 14,
+   "id": "750a66e2",
+   "metadata": {
+    "execution": {
+     "iopub.execute_input": "2025-10-17T17:51:09.882342Z",
+     "iopub.status.busy": "2025-10-17T17:51:09.881420Z",
+     "iopub.status.idle": "2025-10-17T17:51:09.887522Z",
+     "shell.execute_reply": "2025-10-17T17:51:09.886585Z"
+    },
+    "papermill": {
+     "duration": 0.016393,
+     "end_time": "2025-10-17T17:51:09.889617",
+     "exception": false,
+     "start_time": "2025-10-17T17:51:09.873224",
+     "status": "completed"
+    },
+    "tags": []
+   },
+   "outputs": [
+    {
+     "data": {
+      "text/plain": [
+       "8792"
+      ]
+     },
+     "execution_count": 14,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "x.shape[0]\n",
+    "#A big dataset i guess "
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 15,
+   "id": "ad4eb00a",
+   "metadata": {
+    "execution": {
+     "iopub.execute_input": "2025-10-17T17:51:09.905375Z",
+     "iopub.status.busy": "2025-10-17T17:51:09.904980Z",
+     "iopub.status.idle": "2025-10-17T17:51:09.912171Z",
+     "shell.execute_reply": "2025-10-17T17:51:09.911076Z"
+    },
+    "papermill": {
+     "duration": 0.017796,
+     "end_time": "2025-10-17T17:51:09.914548",
+     "exception": false,
+     "start_time": "2025-10-17T17:51:09.896752",
+     "status": "completed"
+    },
+    "tags": []
+   },
+   "outputs": [
+    {
+     "data": {
+      "text/plain": [
+       "Index(['show_id', 'type', 'title', 'director', 'cast', 'country', 'date_added',\n",
+       "       'release_year', 'rating', 'duration', 'listed_in', 'description'],\n",
+       "      dtype='object')"
+      ]
+     },
+     "execution_count": 15,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "x.columns"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 16,
+   "id": "0eb9222d",
+   "metadata": {
+    "execution": {
+     "iopub.execute_input": "2025-10-17T17:51:09.930582Z",
+     "iopub.status.busy": "2025-10-17T17:51:09.930187Z",
+     "iopub.status.idle": "2025-10-17T17:51:09.937206Z",
+     "shell.execute_reply": "2025-10-17T17:51:09.936108Z"
+    },
+    "papermill": {
+     "duration": 0.017513,
+     "end_time": "2025-10-17T17:51:09.939273",
+     "exception": false,
+     "start_time": "2025-10-17T17:51:09.921760",
+     "status": "completed"
+    },
+    "tags": []
+   },
+   "outputs": [
+    {
+     "data": {
+      "text/plain": [
+       "12"
+      ]
+     },
+     "execution_count": 16,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "#So there are 12 feaures \n",
+    "len(x.columns)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "d706463b",
+   "metadata": {
+    "papermill": {
+     "duration": 0.006987,
+     "end_time": "2025-10-17T17:51:09.953326",
+     "exception": false,
+     "start_time": "2025-10-17T17:51:09.946339",
+     "status": "completed"
+    },
+    "tags": []
+   },
+   "source": [
+    "Lets Study the dataset"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 17,
+   "id": "e88734ec",
+   "metadata": {
+    "execution": {
+     "iopub.execute_input": "2025-10-17T17:51:09.969308Z",
+     "iopub.status.busy": "2025-10-17T17:51:09.968985Z",
+     "iopub.status.idle": "2025-10-17T17:51:09.978545Z",
+     "shell.execute_reply": "2025-10-17T17:51:09.977438Z"
+    },
+    "papermill": {
+     "duration": 0.019764,
+     "end_time": "2025-10-17T17:51:09.980497",
+     "exception": false,
+     "start_time": "2025-10-17T17:51:09.960733",
+     "status": "completed"
+    },
+    "tags": []
+   },
+   "outputs": [
+    {
+     "data": {
+      "text/plain": [
+       "array(['Movie', 'TV Show'], dtype=object)"
+      ]
+     },
+     "execution_count": 17,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "#Lets see how many different type of shows are there in Netflix Dataset\n",
+    "x['type'].unique()"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "ee99d950",
+   "metadata": {
+    "papermill": {
+     "duration": 0.007022,
+     "end_time": "2025-10-17T17:51:09.994751",
+     "exception": false,
+     "start_time": "2025-10-17T17:51:09.987729",
+     "status": "completed"
+    },
+    "tags": []
+   },
+   "source": [
+    "So only a Movie or  TV Show. Lets see the distribution"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 18,
+   "id": "9cc7ecc2",
+   "metadata": {
+    "execution": {
+     "iopub.execute_input": "2025-10-17T17:51:10.010979Z",
+     "iopub.status.busy": "2025-10-17T17:51:10.010277Z",
+     "iopub.status.idle": "2025-10-17T17:51:10.133254Z",
+     "shell.execute_reply": "2025-10-17T17:51:10.131985Z"
+    },
+    "papermill": {
+     "duration": 0.135214,
+     "end_time": "2025-10-17T17:51:10.137140",
+     "exception": false,
+     "start_time": "2025-10-17T17:51:10.001926",
+     "status": "completed"
+    },
+    "tags": []
+   },
+   "outputs": [
+    {
+     "data": {
+      "image/png": "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",
+      "text/plain": [
+       "<Figure size 640x480 with 1 Axes>"
+      ]
+     },
+     "metadata": {},
+     "output_type": "display_data"
+    }
+   ],
+   "source": [
+    "#Pie Chart\n",
+    "plt.pie(x['type'].value_counts(),labels=x['type'].unique())\n",
+    "plt.show()"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 19,
+   "id": "2bebf545",
+   "metadata": {
+    "execution": {
+     "iopub.execute_input": "2025-10-17T17:51:10.183430Z",
+     "iopub.status.busy": "2025-10-17T17:51:10.182026Z",
+     "iopub.status.idle": "2025-10-17T17:51:10.195874Z",
+     "shell.execute_reply": "2025-10-17T17:51:10.194640Z"
+    },
+    "papermill": {
+     "duration": 0.041677,
+     "end_time": "2025-10-17T17:51:10.200478",
+     "exception": false,
+     "start_time": "2025-10-17T17:51:10.158801",
+     "status": "completed"
+    },
+    "tags": []
+   },
+   "outputs": [
+    {
+     "data": {
+      "text/plain": [
+       "type\n",
+       "Movie      6127\n",
+       "TV Show    2665\n",
+       "Name: count, dtype: int64"
+      ]
+     },
+     "execution_count": 19,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "x['type'].value_counts()"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 20,
+   "id": "a968880d",
+   "metadata": {
+    "execution": {
+     "iopub.execute_input": "2025-10-17T17:51:10.232171Z",
+     "iopub.status.busy": "2025-10-17T17:51:10.231815Z",
+     "iopub.status.idle": "2025-10-17T17:51:10.242040Z",
+     "shell.execute_reply": "2025-10-17T17:51:10.241035Z"
+    },
+    "papermill": {
+     "duration": 0.02297,
+     "end_time": "2025-10-17T17:51:10.245035",
+     "exception": false,
+     "start_time": "2025-10-17T17:51:10.222065",
+     "status": "completed"
+    },
+    "tags": []
+   },
+   "outputs": [
+    {
+     "name": "stderr",
+     "output_type": "stream",
+     "text": [
+      "/tmp/ipykernel_18/745877436.py:1: FutureWarning: Series.__getitem__ treating keys as positions is deprecated. In a future version, integer keys will always be treated as labels (consistent with DataFrame behavior). To access a value by position, use `ser.iloc[pos]`\n",
+      "  x['type'].value_counts()[0]/x['type'].value_counts()[1]\n",
+      "/tmp/ipykernel_18/745877436.py:1: FutureWarning: Series.__getitem__ treating keys as positions is deprecated. In a future version, integer keys will always be treated as labels (consistent with DataFrame behavior). To access a value by position, use `ser.iloc[pos]`\n",
+      "  x['type'].value_counts()[0]/x['type'].value_counts()[1]\n"
+     ]
+    },
+    {
+     "data": {
+      "text/plain": [
+       "2.29906191369606"
+      ]
+     },
+     "execution_count": 20,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "x['type'].value_counts()[0]/x['type'].value_counts()[1]\n",
+    "#The number of movies in the dataset is almost 2.3 times that of shows."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 21,
+   "id": "4b30086b",
+   "metadata": {
+    "execution": {
+     "iopub.execute_input": "2025-10-17T17:51:10.263949Z",
+     "iopub.status.busy": "2025-10-17T17:51:10.262987Z",
+     "iopub.status.idle": "2025-10-17T17:51:10.278476Z",
+     "shell.execute_reply": "2025-10-17T17:51:10.277243Z"
+    },
+    "papermill": {
+     "duration": 0.027601,
+     "end_time": "2025-10-17T17:51:10.280610",
+     "exception": false,
+     "start_time": "2025-10-17T17:51:10.253009",
+     "status": "completed"
+    },
+    "tags": []
+   },
+   "outputs": [
+    {
+     "data": {
+      "text/html": [
+       "<div>\n",
+       "<style scoped>\n",
+       "    .dataframe tbody tr th:only-of-type {\n",
+       "        vertical-align: middle;\n",
+       "    }\n",
+       "\n",
+       "    .dataframe tbody tr th {\n",
+       "        vertical-align: top;\n",
+       "    }\n",
+       "\n",
+       "    .dataframe thead th {\n",
+       "        text-align: right;\n",
+       "    }\n",
+       "</style>\n",
+       "<table border=\"1\" class=\"dataframe\">\n",
+       "  <thead>\n",
+       "    <tr style=\"text-align: right;\">\n",
+       "      <th></th>\n",
+       "      <th>show_id</th>\n",
+       "      <th>type</th>\n",
+       "      <th>title</th>\n",
+       "      <th>director</th>\n",
+       "      <th>cast</th>\n",
+       "      <th>country</th>\n",
+       "      <th>date_added</th>\n",
+       "      <th>release_year</th>\n",
+       "      <th>rating</th>\n",
+       "      <th>duration</th>\n",
+       "      <th>listed_in</th>\n",
+       "      <th>description</th>\n",
+       "    </tr>\n",
+       "  </thead>\n",
+       "  <tbody>\n",
+       "    <tr>\n",
+       "      <th>0</th>\n",
+       "      <td>s1</td>\n",
+       "      <td>Movie</td>\n",
+       "      <td>Dick Johnson Is Dead</td>\n",
+       "      <td>Kirsten Johnson</td>\n",
+       "      <td>unknown cast</td>\n",
+       "      <td>United States</td>\n",
+       "      <td>September 25, 2021</td>\n",
+       "      <td>2020</td>\n",
+       "      <td>PG-13</td>\n",
+       "      <td>90 min</td>\n",
+       "      <td>Documentaries</td>\n",
+       "      <td>As her father nears the end of his life, filmm...</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>1</th>\n",
+       "      <td>s2</td>\n",
+       "      <td>TV Show</td>\n",
+       "      <td>Blood &amp; Water</td>\n",
+       "      <td>unknown directors</td>\n",
+       "      <td>Ama Qamata, Khosi Ngema, Gail Mabalane, Thaban...</td>\n",
+       "      <td>South Africa</td>\n",
+       "      <td>September 24, 2021</td>\n",
+       "      <td>2021</td>\n",
+       "      <td>TV-MA</td>\n",
+       "      <td>2 Seasons</td>\n",
+       "      <td>International TV Shows, TV Dramas, TV Mysteries</td>\n",
+       "      <td>After crossing paths at a party, a Cape Town t...</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>2</th>\n",
+       "      <td>s3</td>\n",
+       "      <td>TV Show</td>\n",
+       "      <td>Ganglands</td>\n",
+       "      <td>Julien Leclercq</td>\n",
+       "      <td>Sami Bouajila, Tracy Gotoas, Samuel Jouy, Nabi...</td>\n",
+       "      <td>unknown country</td>\n",
+       "      <td>September 24, 2021</td>\n",
+       "      <td>2021</td>\n",
+       "      <td>TV-MA</td>\n",
+       "      <td>1 Season</td>\n",
+       "      <td>Crime TV Shows, International TV Shows, TV Act...</td>\n",
+       "      <td>To protect his family from a powerful drug lor...</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>3</th>\n",
+       "      <td>s4</td>\n",
+       "      <td>TV Show</td>\n",
+       "      <td>Jailbirds New Orleans</td>\n",
+       "      <td>unknown directors</td>\n",
+       "      <td>unknown cast</td>\n",
+       "      <td>unknown country</td>\n",
+       "      <td>September 24, 2021</td>\n",
+       "      <td>2021</td>\n",
+       "      <td>TV-MA</td>\n",
+       "      <td>1 Season</td>\n",
+       "      <td>Docuseries, Reality TV</td>\n",
+       "      <td>Feuds, flirtations and toilet talk go down amo...</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>4</th>\n",
+       "      <td>s5</td>\n",
+       "      <td>TV Show</td>\n",
+       "      <td>Kota Factory</td>\n",
+       "      <td>unknown directors</td>\n",
+       "      <td>Mayur More, Jitendra Kumar, Ranjan Raj, Alam K...</td>\n",
+       "      <td>India</td>\n",
+       "      <td>September 24, 2021</td>\n",
+       "      <td>2021</td>\n",
+       "      <td>TV-MA</td>\n",
+       "      <td>2 Seasons</td>\n",
+       "      <td>International TV Shows, Romantic TV Shows, TV ...</td>\n",
+       "      <td>In a city of coaching centers known to train I...</td>\n",
+       "    </tr>\n",
+       "  </tbody>\n",
+       "</table>\n",
+       "</div>"
+      ],
+      "text/plain": [
+       "  show_id     type                  title           director  \\\n",
+       "0      s1    Movie   Dick Johnson Is Dead    Kirsten Johnson   \n",
+       "1      s2  TV Show          Blood & Water  unknown directors   \n",
+       "2      s3  TV Show              Ganglands    Julien Leclercq   \n",
+       "3      s4  TV Show  Jailbirds New Orleans  unknown directors   \n",
+       "4      s5  TV Show           Kota Factory  unknown directors   \n",
+       "\n",
+       "                                                cast          country  \\\n",
+       "0                                       unknown cast    United States   \n",
+       "1  Ama Qamata, Khosi Ngema, Gail Mabalane, Thaban...     South Africa   \n",
+       "2  Sami Bouajila, Tracy Gotoas, Samuel Jouy, Nabi...  unknown country   \n",
+       "3                                       unknown cast  unknown country   \n",
+       "4  Mayur More, Jitendra Kumar, Ranjan Raj, Alam K...            India   \n",
+       "\n",
+       "           date_added  release_year rating   duration  \\\n",
+       "0  September 25, 2021          2020  PG-13     90 min   \n",
+       "1  September 24, 2021          2021  TV-MA  2 Seasons   \n",
+       "2  September 24, 2021          2021  TV-MA   1 Season   \n",
+       "3  September 24, 2021          2021  TV-MA   1 Season   \n",
+       "4  September 24, 2021          2021  TV-MA  2 Seasons   \n",
+       "\n",
+       "                                           listed_in  \\\n",
+       "0                                      Documentaries   \n",
+       "1    International TV Shows, TV Dramas, TV Mysteries   \n",
+       "2  Crime TV Shows, International TV Shows, TV Act...   \n",
+       "3                             Docuseries, Reality TV   \n",
+       "4  International TV Shows, Romantic TV Shows, TV ...   \n",
+       "\n",
+       "                                         description  \n",
+       "0  As her father nears the end of his life, filmm...  \n",
+       "1  After crossing paths at a party, a Cape Town t...  \n",
+       "2  To protect his family from a powerful drug lor...  \n",
+       "3  Feuds, flirtations and toilet talk go down amo...  \n",
+       "4  In a city of coaching centers known to train I...  "
+      ]
+     },
+     "execution_count": 21,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "#Lets see the dataset again\n",
+    "x.head(\n",
+    ")"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 22,
+   "id": "2c118c1e",
+   "metadata": {
+    "execution": {
+     "iopub.execute_input": "2025-10-17T17:51:10.298954Z",
+     "iopub.status.busy": "2025-10-17T17:51:10.298205Z",
+     "iopub.status.idle": "2025-10-17T17:51:10.306225Z",
+     "shell.execute_reply": "2025-10-17T17:51:10.305207Z"
+    },
+    "papermill": {
+     "duration": 0.019363,
+     "end_time": "2025-10-17T17:51:10.308205",
+     "exception": false,
+     "start_time": "2025-10-17T17:51:10.288842",
+     "status": "completed"
+    },
+    "tags": []
+   },
+   "outputs": [
+    {
+     "data": {
+      "text/plain": [
+       "8789"
+      ]
+     },
+     "execution_count": 22,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "#Number of unique titles \n",
+    "len(x['title'].unique())\n",
+    "\n",
+    "#Same as the dataset size"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 23,
+   "id": "f1373b8f",
+   "metadata": {
+    "execution": {
+     "iopub.execute_input": "2025-10-17T17:51:10.326274Z",
+     "iopub.status.busy": "2025-10-17T17:51:10.325858Z",
+     "iopub.status.idle": "2025-10-17T17:51:10.332861Z",
+     "shell.execute_reply": "2025-10-17T17:51:10.331887Z"
+    },
+    "papermill": {
+     "duration": 0.018578,
+     "end_time": "2025-10-17T17:51:10.334919",
+     "exception": false,
+     "start_time": "2025-10-17T17:51:10.316341",
+     "status": "completed"
+    },
+    "tags": []
+   },
+   "outputs": [
+    {
+     "data": {
+      "text/plain": [
+       "749"
+      ]
+     },
+     "execution_count": 23,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "len(x['country'].unique())"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 24,
+   "id": "fe369e33",
+   "metadata": {
+    "execution": {
+     "iopub.execute_input": "2025-10-17T17:51:10.352790Z",
+     "iopub.status.busy": "2025-10-17T17:51:10.352377Z",
+     "iopub.status.idle": "2025-10-17T17:51:10.362104Z",
+     "shell.execute_reply": "2025-10-17T17:51:10.361089Z"
+    },
+    "papermill": {
+     "duration": 0.021011,
+     "end_time": "2025-10-17T17:51:10.364169",
+     "exception": false,
+     "start_time": "2025-10-17T17:51:10.343158",
+     "status": "completed"
+    },
+    "tags": []
+   },
+   "outputs": [
+    {
+     "data": {
+      "text/plain": [
+       "country\n",
+       "United States                             2810\n",
+       "India                                      972\n",
+       "unknown country                            829\n",
+       "United Kingdom                             418\n",
+       "Japan                                      243\n",
+       "                                          ... \n",
+       "Romania, Bulgaria, Hungary                   1\n",
+       "Uruguay, Guatemala                           1\n",
+       "France, Senegal, Belgium                     1\n",
+       "Mexico, United States, Spain, Colombia       1\n",
+       "United Arab Emirates, Jordan                 1\n",
+       "Name: count, Length: 749, dtype: int64"
+      ]
+     },
+     "execution_count": 24,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "x['country'].value_counts()"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "0173458d",
+   "metadata": {
+    "execution": {
+     "iopub.execute_input": "2025-10-17T17:45:54.900458Z",
+     "iopub.status.busy": "2025-10-17T17:45:54.900103Z",
+     "iopub.status.idle": "2025-10-17T17:45:54.910045Z",
+     "shell.execute_reply": "2025-10-17T17:45:54.908926Z",
+     "shell.execute_reply.started": "2025-10-17T17:45:54.900432Z"
+    },
+    "papermill": {
+     "duration": 0.008411,
+     "end_time": "2025-10-17T17:51:10.381071",
+     "exception": false,
+     "start_time": "2025-10-17T17:51:10.372660",
+     "status": "completed"
+    },
+    "tags": []
+   },
+   "outputs": [],
+   "source": []
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "f018de2a",
+   "metadata": {
+    "papermill": {
+     "duration": 0.008099,
+     "end_time": "2025-10-17T17:51:10.398012",
+     "exception": false,
+     "start_time": "2025-10-17T17:51:10.389913",
+     "status": "completed"
+    },
+    "tags": []
+   },
+   "outputs": [],
+   "source": []
+  }
+ ],
+ "metadata": {
+  "kaggle": {
+   "accelerator": "none",
+   "dataSources": [
+    {
+     "datasetId": 4769773,
+     "sourceId": 8081202,
+     "sourceType": "datasetVersion"
+    }
+   ],
+   "dockerImageVersionId": 30698,
+   "isGpuEnabled": false,
+   "isInternetEnabled": true,
+   "language": "python",
+   "sourceType": "notebook"
+  },
+  "kernelspec": {
+   "display_name": "Python 3",
+   "language": "python",
+   "name": "python3"
+  },
+  "language_info": {
+   "codemirror_mode": {
+    "name": "ipython",
+    "version": 3
+   },
+   "file_extension": ".py",
+   "mimetype": "text/x-python",
+   "name": "python",
+   "nbconvert_exporter": "python",
+   "pygments_lexer": "ipython3",
+   "version": "3.10.13"
+  },
+  "papermill": {
+   "default_parameters": {},
+   "duration": 6.887039,
+   "end_time": "2025-10-17T17:51:10.926863",
+   "environment_variables": {},
+   "exception": null,
+   "input_path": "__notebook__.ipynb",
+   "output_path": "__notebook__.ipynb",
+   "parameters": {},
+   "start_time": "2025-10-17T17:51:04.039824",
+   "version": "2.5.0"
+  }
+ },
+ "nbformat": 4,
+ "nbformat_minor": 5
+}
